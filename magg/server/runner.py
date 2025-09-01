@@ -165,22 +165,24 @@ class MaggRunner:
         finally:
             logger.debug("Magg server stopped")
 
-    async def run_http(self, host: str = "localhost", port: int = 8000):
-        """Run server in HTTP mode with proper signal handling."""
+    async def run_http(self, host: str = "localhost", port: int = 8000, 
+                       ssl_keyfile: str | None = None, ssl_certfile: str | None = None):
+        """Run server in HTTP mode with proper signal handling and optional SSL."""
         try:
             async with self._server_context() as server:
                 logger.debug("Starting Magg HTTP server on %s:%s", host, port)
-                await self._serve(server.run_http(host, port))
+                await self._serve(server.run_http(host, port, ssl_keyfile=ssl_keyfile, ssl_certfile=ssl_certfile))
 
         finally:
             logger.debug("Magg HTTP server stopped")
 
-    async def run_hybrid(self, host: str = "localhost", port: int = 8000):
-        """Run server in hybrid mode (stdio + HTTP) with proper signal handling."""
+    async def run_hybrid(self, host: str = "localhost", port: int = 8000,
+                        ssl_keyfile: str | None = None, ssl_certfile: str | None = None):
+        """Run server in hybrid mode (stdio + HTTP) with proper signal handling and optional SSL."""
         try:
             async with self._server_context() as server:
                 logger.debug("Starting Magg hybrid server (stdio + HTTP on %s:%s)", host, port)
-                await self._serve(server.run_hybrid(host, port))
+                await self._serve(server.run_hybrid(host, port, ssl_keyfile=ssl_keyfile, ssl_certfile=ssl_certfile))
 
         finally:
             logger.debug("Magg hybrid server stopped")

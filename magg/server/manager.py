@@ -438,22 +438,53 @@ class ManagedServer:
         await self.setup()
         await self.mcp.run_stdio_async(show_banner=False)
 
-    async def run_http(self, host: str = "localhost", port: int = 8000, log_level: str | None = None):
-        """Run Magg in HTTP mode.
+    async def run_http(self, host: str = "localhost", port: int = 8000, log_level: str | None = None,
+                       ssl_keyfile: str | None = None, ssl_certfile: str | None = None):
+        """Run Magg in HTTP mode with optional SSL support.
         """
         log_level = log_level or os.getenv("FASTMCP_LOG_LEVEL", "CRITICAL").upper() or "CRITICAL"
         await self.setup()
-        await self.mcp.run_http_async(host=host, port=port, log_level=log_level, show_banner=False)
+        
+        # Build uvicorn config with SSL if certificates provided
+        uvicorn_config = {}
+        if ssl_keyfile and ssl_certfile:
+            uvicorn_config = {
+                "ssl_keyfile": ssl_keyfile,
+                "ssl_certfile": ssl_certfile
+            }
+        
+        await self.mcp.run_http_async(
+            host=host, 
+            port=port, 
+            log_level=log_level, 
+            show_banner=False,
+            uvicorn_config=uvicorn_config if uvicorn_config else None
+        )
 
-    async def run_hybrid(self, host: str = "localhost", port: int = 8000, log_level: str | None = None):
-        """Run Magg in hybrid mode - both stdio and HTTP simultaneously.
+    async def run_hybrid(self, host: str = "localhost", port: int = 8000, log_level: str | None = None,
+                        ssl_keyfile: str | None = None, ssl_certfile: str | None = None):
+        """Run Magg in hybrid mode - both stdio and HTTP simultaneously with optional SSL support.
         """
         log_level = log_level or os.getenv("FASTMCP_LOG_LEVEL", "CRITICAL").upper() or "CRITICAL"
 
         await self.setup()
+
+        # Build uvicorn config with SSL if certificates provided
+        uvicorn_config = {}
+        if ssl_keyfile and ssl_certfile:
+            uvicorn_config = {
+                "ssl_keyfile": ssl_keyfile,
+                "ssl_certfile": ssl_certfile
+            }
 
         http_task = asyncio.create_task(
-            self.mcp.run_http_async(host=host, port=port, log_level=log_level, show_banner=False)
+            self.mcp.run_http_async(
+                host=host, 
+                port=port, 
+                log_level=log_level, 
+                show_banner=False,
+                uvicorn_config=uvicorn_config if uvicorn_config else None
+            )
         )
 
         stdio_task = asyncio.create_task(

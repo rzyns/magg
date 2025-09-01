@@ -50,10 +50,20 @@ async def cmd_serve(args) -> int:
     try:
         if args.hybrid:
             logger.info("Starting hybrid server (stdio + HTTP on %s:%s)", args.host, args.port)
-            await runner.run_hybrid(host=args.host, port=args.port)
+            await runner.run_hybrid(
+                host=args.host, 
+                port=args.port,
+                ssl_keyfile=getattr(args, 'ssl_keyfile', None),
+                ssl_certfile=getattr(args, 'ssl_certfile', None)
+            )
         elif args.http:
             logger.info("Starting HTTP server on %s:%s", args.host, args.port)
-            await runner.run_http(host=args.host, port=args.port)
+            await runner.run_http(
+                host=args.host, 
+                port=args.port,
+                ssl_keyfile=getattr(args, 'ssl_keyfile', None),
+                ssl_certfile=getattr(args, 'ssl_certfile', None)
+            )
         else:
             logger.info("Starting stdio server")
             await runner.run_stdio()
@@ -90,6 +100,16 @@ def cmd_serve_args(parser: argparse.ArgumentParser) -> None:
         type=int,
         default=8000,
         help='HTTP server port (default: 8000)'
+    )
+    parser.add_argument(
+        '--ssl-keyfile',
+        type=str,
+        help='Path to SSL key file for HTTPS (optional)'
+    )
+    parser.add_argument(
+        '--ssl-certfile',
+        type=str,
+        help='Path to SSL certificate file for HTTPS (optional)'
     )
     parser.add_argument(
         '--no-banner',

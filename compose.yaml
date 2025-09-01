@@ -17,8 +17,14 @@ services:
       MAGG_RELOAD_USE_WATCHDOG: ${MAGG_RELOAD_USE_WATCHDOG:-}
       MAGG_STDERR_SHOW: ${MAGG_STDERR_SHOW:-}
       MAGG_PREFIX_SEP: ${MAGG_PREFIX_SEP:-}
+      MAGG_SSL_KEYFILE: ${MAGG_SSL_KEYFILE:-}
+      MAGG_SSL_CERTFILE: ${MAGG_SSL_CERTFILE:-}
     volumes:
       - ${MAGG_CONFIG_VOLUME:-magg-config}:/home/magg/.magg
+      # Legacy directory mount for backward compatibility
+      - ${MAGG_SSL_CERTS_PATH:-./certs}:/certs:ro
+      # For host path SSL certificates, use compose.ssl.yaml overlay:
+      # docker compose -f compose.yaml -f compose.ssl.yaml up
     networks:
       - magg-network
     restart: unless-stopped
@@ -56,6 +62,10 @@ services:
       - "8008:8000"
     volumes:
       - ./.magg:/home/magg/.magg:rw
+      # Legacy directory mount for backward compatibility
+      - ${MAGG_SSL_CERTS_PATH:-./certs}:/certs:ro
+      # For host path SSL certificates, use compose.ssl.yaml overlay:
+      # docker compose -f compose.yaml -f compose.ssl.yaml up
 
 volumes:
   magg-config:

@@ -75,9 +75,12 @@ RUN mkdir -p .magg && \
 
 EXPOSE 8000
 
-ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["magg", "serve", "--http", "--host", "0.0.0.0", "--port", "8000"]
+# Add entrypoint script for SSL support
+COPY --chown=${USER}:${USER} docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
+ENTRYPOINT ["/sbin/tini", "--", "/usr/local/bin/docker-entrypoint.sh"]
+CMD []
 
 FROM proj AS pre
 
